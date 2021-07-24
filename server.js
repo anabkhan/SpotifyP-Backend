@@ -32,9 +32,7 @@ api.initalize().then(info => {
     });
 
     app.get('/getNext', (req, res) => {
-        // var searchQuery = req.query.searchQuery;
         var videoId = req.query.videoId;
-        // var searchQuery = req.query.searchQuery;
         console.log('suggestion url requested request for ', videoId)
         api.getNext(videoId).then(result => {
             res.send(result)
@@ -42,22 +40,23 @@ api.initalize().then(info => {
     });
 })
 
-// app.get('/search', (req, res) => {
-//     const searchQuery = req.query.searchQuery;
-//     console.log(searchQuery)
-//     api.initalize().then(info => {
-//         api.search(searchQuery,'VIDEO', 50).then(result => res.send(result))
-//     })
-// });
-
 app.get('/getStreamingURL', (req, res) => {
     var url = req.query.url;
     console.log('stream url requested request for ', url)
-    ytdl.getInfo(url, { filter: 'audio' }).then(info => {
-        const format = ytdl.chooseFormat(info.formats, { filter: 'audio' });
-        res.send(format.url)
+    ytdl.getInfo(url, { filter: 'audioonly' }).then(info => {
+        // const format = ytdl.chooseFormat(info.formats, { filter: 'audio' });
+        let videoUrl = null;
+        let audioUrl = null
+        info.formats.forEach(format => {
+          if (format.mimeType.startsWith('audio/mp4')) {
+            audioUrl = format.url;
+          } else if (format.container == 'mp4' && videoUrl == null) {
+            videoUrl = format.url;
+          }
+        });
+        res.send(audioUrl != null ? audioUrl : videoUrl)
     })
-});
+  });
 
 app.get('/download', (req, res) => {
     var url = req.query.url;
