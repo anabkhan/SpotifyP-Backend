@@ -15,6 +15,6 @@
     "ffmpeg": "0.0.4",
     "youtube-music-api": "^1.0.6",
     "youtubei": "0.0.1-rc.27",
-    "ytdl-core": "^4.7.0"
+    "ytdl-core": "^4.9.1"
   }
 }
