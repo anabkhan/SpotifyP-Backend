@@ -68,8 +68,15 @@ app.get('/download', (req, res) => {
     ytdl(url, { filter: 'audioonly' }).pipe(res);
 });
 
+/**
+ * Get related videos by vidoe ids
+ */
 app.post('/related', async (req, res) => {
     var ids = req.body.ids
+    var countForEachvid = req.body.countForEachvid;
+    if (!countForEachvid) {
+        countForEachvid = 2
+    }
     console.log('Getting related for ', ids);
     if (ids) {
         const relatedVids = [];
@@ -77,20 +84,47 @@ app.post('/related', async (req, res) => {
             const id = ids[index];
             const video = await youtube.getVideo(id);
             const relatedVideos = await video.related;
-            const relatedVideo = relatedVideos[0];
-            relatedVids.push({
-                id: relatedVideo.id,
-                videoId: relatedVideo.id,
-                title: relatedVideo.title,
-                name: relatedVideo.title,
-                artist: {name:relatedVideo.channel.name},
-                thumbnails: relatedVideo.thumbnails,
-                duration: relatedVideo.duration * 1000
+            for (let index = 0; index < countForEachvid || index < relatedVideos.length; index++) {
+                const relatedVideo = relatedVideos[index];
+                relatedVids.push({
+                    id: relatedVideo.id,
+                    videoId: relatedVideo.id,
+                    title: relatedVideo.title,
+                    name: relatedVideo.title,
+                    artist: {name:relatedVideo.channel ? relatedVideo.channel.name : '..'},
+                    thumbnails: relatedVideo.thumbnails,
+                    duration: relatedVideo.duration * 1000,
+                    type: 'video'
+                })
+            }
+        }
+        console.log('related song respones ', relatedVids)
+        res.send({songs:relatedVids});
+    } else {
+        res.send({songs:[]})
+    }
+})
+
+/**
+ * Get artists of array of video ids
+ */
+app.post('/artists', async (req, res) => {
+    var ids = req.body.ids
+    console.log('Getting related for ', ids);
+    if (ids) {
+        const artists = [];
+        for (let index = 0; index < ids.length; index++) {
+            const id = ids[index];
+            const video = await youtube.getVideo(id);
+            artists.push({
+                id: video.channel.id,
+                name: video.channel.name,
+                thumbnail: video.channel.thumbnails ? video.channel.thumbnails[0] : null 
             })
         }
-        res.send({songs:relatedVids});
+        res.send({artists:artists});
     } else [
-        res.send({songs:[]})
+        res.send({artists:[]})
     ]
 })
 
