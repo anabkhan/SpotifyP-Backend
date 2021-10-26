@@ -84,18 +84,20 @@ app.post('/related', async (req, res) => {
             const id = ids[index];
             const video = await youtube.getVideo(id);
             const relatedVideos = await video.related;
-            for (let index = 0; index < countForEachvid || index < relatedVideos.length; index++) {
+            for (let index = 0; index < countForEachvid && index < relatedVideos.length; index++) {
                 const relatedVideo = relatedVideos[index];
-                relatedVids.push({
-                    id: relatedVideo.id,
-                    videoId: relatedVideo.id,
-                    title: relatedVideo.title,
-                    name: relatedVideo.title,
-                    artist: {name:relatedVideo.channel ? relatedVideo.channel.name : '..'},
-                    thumbnails: relatedVideo.thumbnails,
-                    duration: relatedVideo.duration * 1000,
-                    type: 'video'
-                })
+                if (relatedVideo.channel && relatedVideo.id && relatedVideo.duration) {
+                    relatedVids.push({
+                        id: relatedVideo.id,
+                        videoId: relatedVideo.id,
+                        title: relatedVideo.title,
+                        name: relatedVideo.title,
+                        artist: {name:relatedVideo.channel.name},
+                        thumbnails: relatedVideo.thumbnails,
+                        duration: relatedVideo.duration * 1000,
+                        type: 'video'
+                    })
+                }
             }
         }
         console.log('related song respones ', relatedVids)
